@@ -11,9 +11,15 @@ keys work everywhere.
 | Action | Controller | What it does |
 | --- | --- | --- |
 | **AudioFuse Dial** | Encoder | Drives any one parameter — monitor volume, reference level, input gain 1–16, output trim 3–10, preset slot, sample rate. The LCD shows the name, the live value in dB, and a bar scaled to that parameter's real range. Push or tap to mute, jump to reference, or reset. |
-| **Monitor Toggle** | Key | Mute, dim, mono fold-down, or A/B speaker set. Lights from the device's own state. |
+| **Mute** | Key | Mutes the main monitor output. Red while muted. |
+| **Dim** | Key | Drops the monitors by the device's dim amount. |
+| **Mono** | Key | Folds the monitor output to mono, for a mix check. |
+| **Speaker Set A/B** | Key | Switches between speaker sets, showing which is live. |
 | **Reference Level** | Key | Snaps the monitor to the calibrated reference level, and lights whenever the monitor is sitting at it. |
 | **Preset Recall** | Key | Recalls one of the eight slots, showing its stored name. Marks the loaded slot with `*` when the device has unsaved edits. 16Rig only. |
+
+Only Preset Recall needs configuring — pick which slot. The rest do what their
+name says as soon as you drop them on a key.
 
 Every key and dial reflects the device rather than the last thing the plugin
 sent, so changes made in Control Center or on the unit itself show up too.
@@ -146,6 +152,18 @@ the display with the device and picks up any clamping it applied.
 Panels are repainted at most every 60 ms, on the leading edge with a guaranteed
 trailing frame, and the reading's right edge is pinned so gaining a digit grows
 the number leftwards instead of sliding the whole string sideways.
+
+### `setImage` needs an encoded data URI, not raw SVG markup
+
+Not an API quirk, a Stream Deck one, but it cost an afternoon. The SDK
+documents `setImage` as accepting "an SVG string", and passing one resolves
+successfully — but the key never changes. These drawings carry hex colours, and
+an unencoded `#` begins the fragment of a data URI, so the image is truncated at
+the first `fill`. Stream Deck then quietly leaves the manifest icon in place.
+
+The failure reports success at every layer, so the only visible symptom is a key
+that renders its static icon forever. `toKeyImage()` percent-encodes; `toPixmap()`
+uses base64 for the encoder layouts, which accept nothing else.
 
 ### Option lists differ from the documented shape
 

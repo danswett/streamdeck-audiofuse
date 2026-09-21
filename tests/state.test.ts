@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { asBool, asNumber } from "../src/audiofuse/store";
-import { fractionOf, renderDial, renderKey, toPixmap } from "../src/render";
+import { fractionOf, renderDial, renderKey, toKeyImage, toPixmap } from "../src/render";
 
 describe("asBool", () => {
 	/**
@@ -63,6 +63,26 @@ describe("rendering", () => {
 	it("produces a data URI the layout can display", () => {
 		const uri = toPixmap(renderDial({ label: "Monitor", value: "-24.3 dB", fraction: 0.7 }));
 		expect(uri.startsWith("data:image/svg+xml;base64,")).toBe(true);
+	});
+
+	/**
+	 * setImage needs an encoded data URI, not raw markup. These drawings carry
+	 * hex colours, and an unencoded `#` starts a URI fragment - so a raw SVG is
+	 * truncated at its first fill. Stream Deck reports success and quietly
+	 * leaves the manifest icon in place, so the only symptom is a key that
+	 * never changes.
+	 */
+	it("percent-encodes a key image so hex colours survive", () => {
+		const uri = toKeyImage(renderKey({ label: "MUTE", active: true, tint: "#ff4f4f" }));
+		expect(uri.startsWith("data:image/svg+xml,")).toBe(true);
+		expect(uri).not.toContain("#");
+		expect(uri).toContain("%23");
+	});
+
+	it("round-trips a key image back to the original markup", () => {
+		const svg = renderKey({ label: "DIM", active: false });
+		const decoded = decodeURIComponent(toKeyImage(svg).slice("data:image/svg+xml,".length));
+		expect(decoded).toBe(svg);
 	});
 
 	it("draws the label and value onto the panel", () => {

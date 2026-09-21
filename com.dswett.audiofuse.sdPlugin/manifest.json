@@ -50,15 +50,50 @@
 			]
 		},
 		{
-			"Name": "Monitor Toggle",
-			"UUID": "com.dswett.audiofuse.monitor",
-			"Icon": "imgs/actions/monitor",
-			"Tooltip": "Mute, dim, mono or A/B speaker switching, with live state.",
-			"PropertyInspectorPath": "ui/monitor.html",
+			"Name": "Mute",
+			"UUID": "com.dswett.audiofuse.mute",
+			"Icon": "imgs/actions/mute",
+			"Tooltip": "Mute the main monitor output. Lights red while muted.",
 			"Controllers": ["Keypad"],
 			"States": [
 				{
-					"Image": "imgs/actions/monitor"
+					"Image": "imgs/actions/mute"
+				}
+			]
+		},
+		{
+			"Name": "Dim",
+			"UUID": "com.dswett.audiofuse.dim",
+			"Icon": "imgs/actions/dim",
+			"Tooltip": "Drop the monitors by the device's dim amount.",
+			"Controllers": ["Keypad"],
+			"States": [
+				{
+					"Image": "imgs/actions/dim"
+				}
+			]
+		},
+		{
+			"Name": "Mono",
+			"UUID": "com.dswett.audiofuse.mono",
+			"Icon": "imgs/actions/mono",
+			"Tooltip": "Fold the monitor output to mono for a mix check.",
+			"Controllers": ["Keypad"],
+			"States": [
+				{
+					"Image": "imgs/actions/mono"
+				}
+			]
+		},
+		{
+			"Name": "Speaker Set A/B",
+			"UUID": "com.dswett.audiofuse.speakers",
+			"Icon": "imgs/actions/speakers",
+			"Tooltip": "Switch between speaker sets A and B. Shows which is live.",
+			"Controllers": ["Keypad"],
+			"States": [
+				{
+					"Image": "imgs/actions/speakers"
 				}
 			]
 		},

@@ -10,8 +10,8 @@ import streamDeck, {
 import type { JsonObject } from "@elgato/utils";
 
 import { asBool, asNumber, fuse } from "../audiofuse/store";
-import { MONITOR_VOLUME, toggleById } from "../audiofuse/params";
-import { type KeyFace, renderKey } from "../render";
+import { MONITOR_VOLUME, type ParamSpec, toggleById } from "../audiofuse/params";
+import { type KeyFace, renderKey, toKeyImage } from "../render";
 
 const logger = streamDeck.logger.createScope("keys");
 
@@ -47,6 +47,7 @@ abstract class WatchedKeyAction<T extends KeySettings> extends SingletonAction<T
 
 		const instance: Instance<T> = { key: ev.action, unwatch: [], settings: ev.payload.settings };
 		this.#instances.set(ev.action.id, instance);
+		logger.info(`${this.manifestId ?? "key"} appeared`);
 
 		if (!this.#unwatchStatus) {
 			this.#unwatchStatus = fuse.watchStatus(() => {
@@ -79,7 +80,15 @@ abstract class WatchedKeyAction<T extends KeySettings> extends SingletonAction<T
 
 	override onKeyDown(ev: KeyDownEvent<T>): void {
 		const instance = this.#instances.get(ev.action.id);
-		if (!instance || !fuse.ready) return;
+		if (!instance) {
+			logger.warn(`${this.manifestId ?? "key"} pressed but never appeared`);
+			return;
+		}
+		if (!fuse.ready) {
+			logger.warn(`${this.manifestId ?? "key"} pressed while ${fuse.snapshot.state}`);
+			return;
+		}
+		logger.info(`${this.manifestId ?? "key"} pressed`);
 		this.press(instance.settings);
 	}
 
@@ -97,7 +106,7 @@ abstract class WatchedKeyAction<T extends KeySettings> extends SingletonAction<T
 		if (instance.painted === signature) return;
 		instance.painted = signature;
 
-		void instance.key.setImage(renderKey(face)).catch((err) => {
+		void instance.key.setImage(toKeyImage(renderKey(face))).catch((err) => {
 			instance.painted = undefined;
 			logger.warn(`setImage failed: ${String(err)}`);
 		});
@@ -106,32 +115,79 @@ abstract class WatchedKeyAction<T extends KeySettings> extends SingletonAction<T
 
 // -- monitor toggles --------------------------------------------------------
 
-type ToggleSettings = { target?: string } & JsonObject;
+/**
+ * One self-contained key per monitor switch.
+ *
+ * Deliberately four named actions rather than one configurable "Monitor
+ * Toggle": the deck has plenty of keys, and a key whose purpose is only visible
+ * after opening its settings is not discoverable. Mute is Mute in the list.
+ */
+abstract class MonitorToggleAction extends WatchedKeyAction<KeySettings> {
+	protected abstract readonly id: string;
+	protected abstract readonly tint: string;
 
-/** Mute, dim, mono and A/B speaker switching, all of which push over SSE. */
-@action({ UUID: "com.dswett.audiofuse.monitor" })
-export class FuseMonitorToggleAction extends WatchedKeyAction<ToggleSettings> {
-	protected override endpoints(settings: ToggleSettings): readonly string[] {
-		const spec = toggleById(settings.target) ?? toggleById("monitor.mute");
+	#spec(): ParamSpec | undefined {
+		return toggleById(this.id);
+	}
+
+	protected override endpoints(): readonly string[] {
+		const spec = this.#spec();
 		return spec ? [spec.path] : [];
 	}
 
-	protected override face(settings: ToggleSettings): KeyFace {
-		const spec = toggleById(settings.target) ?? toggleById("monitor.mute");
+	protected override face(): KeyFace {
+		const spec = this.#spec();
 		if (!spec) return { label: "?", active: false };
-
-		const active = asBool(fuse.value(spec.path));
-		// A/B is a selector rather than an on/off, so it reads as A or B.
-		if (spec.id === "monitor.ab_speaker_set") {
-			return { label: active ? "B" : "A", value: "SPEAKERS", active, tint: "#31c8f0" };
-		}
-		return { label: spec.label.toUpperCase(), active, tint: spec.id === "monitor.mute" ? "#ff4f4f" : "#ffb347" };
+		return { label: spec.label.toUpperCase(), active: asBool(fuse.value(spec.path)), tint: this.tint };
 	}
 
-	protected override press(settings: ToggleSettings): void {
-		const spec = toggleById(settings.target) ?? toggleById("monitor.mute");
+	protected override press(): void {
+		const spec = this.#spec();
 		if (!spec) return;
 		fuse.setBool(spec.path, !asBool(fuse.value(spec.path)));
+	}
+}
+
+/** Mutes the main monitor output. */
+@action({ UUID: "com.dswett.audiofuse.mute" })
+export class FuseMuteAction extends MonitorToggleAction {
+	protected override readonly id = "monitor.mute";
+	protected override readonly tint = "#ff4f4f";
+}
+
+/** Drops the monitors by the device's dim amount. */
+@action({ UUID: "com.dswett.audiofuse.dim" })
+export class FuseDimAction extends MonitorToggleAction {
+	protected override readonly id = "monitor.dim";
+	protected override readonly tint = "#ffb347";
+}
+
+/** Folds the monitor output to mono, for a mix sanity check. */
+@action({ UUID: "com.dswett.audiofuse.mono" })
+export class FuseMonoAction extends MonitorToggleAction {
+	protected override readonly id = "monitor.mono";
+	protected override readonly tint = "#ffb347";
+}
+
+/**
+ * Switches between speaker sets A and B.
+ *
+ * Reads as the set currently selected rather than as on/off, because this is a
+ * two-way selector and "A/B: off" would say nothing useful.
+ */
+@action({ UUID: "com.dswett.audiofuse.speakers" })
+export class FuseSpeakerSetAction extends WatchedKeyAction<KeySettings> {
+	protected override endpoints(): readonly string[] {
+		return ["/monitoring/ab_speaker_set"];
+	}
+
+	protected override face(): KeyFace {
+		const onB = asBool(fuse.value("/monitoring/ab_speaker_set"));
+		return { label: onB ? "B" : "A", value: "SPEAKERS", active: onB, tint: "#31c8f0" };
+	}
+
+	protected override press(): void {
+		fuse.setBool("/monitoring/ab_speaker_set", !asBool(fuse.value("/monitoring/ab_speaker_set")));
 	}
 }
 

@@ -18,6 +18,19 @@ export function toPixmap(svg: string): string {
 	return `data:image/svg+xml;base64,${Buffer.from(svg, "utf8").toString("base64")}`;
 }
 
+/**
+ * Encodes an SVG for `setImage`.
+ *
+ * Passing the raw markup does not work: these drawings carry hex colours, and
+ * an unencoded `#` starts the fragment of a data URI, so the image is truncated
+ * at the first fill. Percent-encoding escapes it. Stream Deck reports success
+ * either way and simply leaves the manifest icon in place, so a key that never
+ * changes - rather than an error - is the symptom of getting this wrong.
+ */
+export function toKeyImage(svg: string): string {
+	return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
 function escapeText(value: string): string {
 	return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }

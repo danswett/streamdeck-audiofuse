@@ -1,13 +1,23 @@
 import streamDeck from "@elgato/streamdeck";
 
 import { FuseDialAction } from "./actions/dial";
-import { FuseMonitorToggleAction, FusePresetAction, FuseReferenceAction } from "./actions/keys";
+import {
+	FuseDimAction,
+	FuseMonoAction,
+	FuseMuteAction,
+	FusePresetAction,
+	FuseReferenceAction,
+	FuseSpeakerSetAction
+} from "./actions/keys";
 import { fuse } from "./audiofuse/store";
 
 streamDeck.logger.setLevel("info");
 
 streamDeck.actions.registerAction(new FuseDialAction());
-streamDeck.actions.registerAction(new FuseMonitorToggleAction());
+streamDeck.actions.registerAction(new FuseMuteAction());
+streamDeck.actions.registerAction(new FuseDimAction());
+streamDeck.actions.registerAction(new FuseMonoAction());
+streamDeck.actions.registerAction(new FuseSpeakerSetAction());
 streamDeck.actions.registerAction(new FuseReferenceAction());
 streamDeck.actions.registerAction(new FusePresetAction());
 
