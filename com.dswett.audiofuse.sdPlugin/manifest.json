@@ -1,0 +1,91 @@
+{
+	"$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+	"Name": "AudioFuse Control",
+	"Version": "1.0.0.0",
+	"Author": "dswett",
+	"Description": "Control an Arturia AudioFuse 16Rig or Studio from your Stream Deck. Dials drive monitor volume, input gain and output trim with live dB on the LCD; keys mirror mute, dim, mono, A/B, reference level and preset slots. Uses the AudioFuse Control Center HTTP API.",
+	"Category": "AudioFuse Control",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"Icon": "imgs/plugin/marketplace",
+	"SupportURL": "https://github.com/danswett/streamdeck-audiofuse/issues",
+	"CodePath": "bin/plugin.js",
+	"SDKVersion": 3,
+	"Software": {
+		"MinimumVersion": "7.1"
+	},
+	"OS": [
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		},
+		{
+			"Platform": "mac",
+			"MinimumVersion": "13"
+		}
+	],
+	"Nodejs": {
+		"Version": "24"
+	},
+	"UUID": "com.dswett.audiofuse",
+	"Actions": [
+		{
+			"Name": "AudioFuse Dial",
+			"UUID": "com.dswett.audiofuse.dial",
+			"Icon": "imgs/actions/dial",
+			"Tooltip": "Drive any AudioFuse parameter from a dial, with live dB on the LCD.",
+			"PropertyInspectorPath": "ui/dial.html",
+			"Controllers": ["Encoder"],
+			"Encoder": {
+				"layout": "layouts/fuse.json",
+				"TriggerDescription": {
+					"Rotate": "Adjust",
+					"Push": "Mute or reset",
+					"Touch": "Mute or reset"
+				}
+			},
+			"States": [
+				{
+					"Image": "imgs/actions/dial"
+				}
+			]
+		},
+		{
+			"Name": "Monitor Toggle",
+			"UUID": "com.dswett.audiofuse.monitor",
+			"Icon": "imgs/actions/monitor",
+			"Tooltip": "Mute, dim, mono or A/B speaker switching, with live state.",
+			"PropertyInspectorPath": "ui/monitor.html",
+			"Controllers": ["Keypad"],
+			"States": [
+				{
+					"Image": "imgs/actions/monitor"
+				}
+			]
+		},
+		{
+			"Name": "Reference Level",
+			"UUID": "com.dswett.audiofuse.reference",
+			"Icon": "imgs/actions/reference",
+			"Tooltip": "Snap the monitor to the calibrated reference level.",
+			"Controllers": ["Keypad"],
+			"States": [
+				{
+					"Image": "imgs/actions/reference"
+				}
+			]
+		},
+		{
+			"Name": "Preset Recall",
+			"UUID": "com.dswett.audiofuse.preset",
+			"Icon": "imgs/actions/preset",
+			"Tooltip": "Recall one of the eight preset slots. AudioFuse 16Rig only.",
+			"PropertyInspectorPath": "ui/preset.html",
+			"Controllers": ["Keypad"],
+			"States": [
+				{
+					"Image": "imgs/actions/preset"
+				}
+			]
+		}
+	]
+}

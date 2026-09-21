@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Monitor toggle settings</title>
+		<link rel="stylesheet" href="inspector.css" />
+		<script src="sdpi-components.js"></script>
+	</head>
+	<body>
+		<sdpi-item label="Control">
+			<sdpi-select setting="target" default="monitor.mute">
+				<option value="monitor.mute">Mute</option>
+				<option value="monitor.dim">Dim</option>
+				<option value="monitor.mono">Mono fold-down</option>
+				<option value="monitor.ab_speaker_set">A/B speaker set</option>
+			</sdpi-select>
+		</sdpi-item>
+		<p class="hint">
+			The key lights up from the device's own state, so it stays right when
+			you change the setting in Control Center or on the unit itself.
+		</p>
+	</body>
+</html>

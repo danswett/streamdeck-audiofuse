@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>AudioFuse dial settings</title>
+		<link rel="stylesheet" href="inspector.css" />
+		<script src="sdpi-components.js"></script>
+	</head>
+	<body>
+		<sdpi-item label="Parameter">
+			<sdpi-select setting="target" default="monitor.volume" id="target"></sdpi-select>
+		</sdpi-item>
+		<p class="hint">
+			What this dial drives. Input gain and output trim are read back by
+			polling, because the device does not announce changes to them.
+		</p>
+
+		<sdpi-item label="Step">
+			<sdpi-select setting="step" default="1">
+				<option value="0.5">0.5 dB per click — fine</option>
+				<option value="1">1 dB per click — normal</option>
+				<option value="2">2 dB per click — coarse</option>
+				<option value="5">5 dB per click — fast</option>
+			</sdpi-select>
+		</sdpi-item>
+
+		<sdpi-item label="Press">
+			<sdpi-select setting="press" default="mute">
+				<option value="mute">Toggle monitor mute</option>
+				<option value="reference">Jump to reference level</option>
+				<option value="reset">Reset this parameter</option>
+				<option value="none">Do nothing</option>
+			</sdpi-select>
+		</sdpi-item>
+		<p class="hint">Pushing the dial or tapping its panel both do this.</p>
+
+		<details>
+			<summary>Connection</summary>
+			<sdpi-item label="Port">
+				<sdpi-textfield global setting="manualPort" placeholder="Auto (Bonjour)"></sdpi-textfield>
+			</sdpi-item>
+			<p class="hint">
+				Leave blank. The port is found automatically over Bonjour and changes
+				between Control Center sessions. Only set it if your network blocks
+				multicast DNS — the current port is shown in Control Center under
+				Preferences &rarr; Http Api. Shared by every key in this plugin.
+			</p>
+		</details>
+
+		<script>
+			// Built here rather than written out as static markup: the channel
+			// counts differ between the 16Rig and the Studio, and repeating
+			// thirty-odd options by hand would rot the moment one changes.
+			const groups = [
+				{
+					label: "Monitor",
+					options: [
+						["monitor.volume", "Monitor volume"],
+						["monitor.reference_level", "Reference level (16Rig)"]
+					]
+				},
+				{
+					label: "Input gain",
+					options: Array.from({ length: 16 }, (_, i) => [`input.${i + 1}.gain`, `Input ${i + 1} gain`])
+				},
+				{
+					label: "Output trim (16Rig)",
+					options: Array.from({ length: 8 }, (_, i) => [
+						`output.${i + 3}.volume`,
+						`Output ${i + 3} volume`
+					])
+				},
+				{
+					label: "Other",
+					options: [
+						["preset.slot", "Preset slot (16Rig)"],
+						["clock.sample_rate", "Sample rate"]
+					]
+				}
+			];
+
+			const select = document.getElementById("target");
+			for (const group of groups) {
+				const optgroup = document.createElement("optgroup");
+				optgroup.label = group.label;
+				for (const [value, label] of group.options) {
+					const option = document.createElement("option");
+					option.value = value;
+					option.textContent = label;
+					optgroup.appendChild(option);
+				}
+				select.appendChild(optgroup);
+			}
+		</script>
+	</body>
+</html>
