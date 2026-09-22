@@ -19,11 +19,12 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 const PLUGIN_DIR = path.resolve(__dirname, "..", "com.bad-duck.audiofuse.sdPlugin");
 const manifest = JSON.parse(readFileSync(path.join(PLUGIN_DIR, "manifest.json"), "utf8")) as {
+	UUID: string;
 	Category: string;
 	Author: string;
 	Icon: string;
 	CategoryIcon: string;
-	Actions: { Name: string; Icon: string; States: { Image: string }[] }[];
+	Actions: { UUID: string; Name: string; Icon: string; States: { Image: string }[] }[];
 };
 
 /**
@@ -197,5 +198,19 @@ describe("category", () => {
 	it("does not include the author name", () => {
 		// "include author names in category" is explicitly listed as incorrect.
 		expect(manifest.Category.toLowerCase()).not.toContain(manifest.Author.toLowerCase());
+	});
+});
+
+describe("identity", () => {
+	it("uses the organization in the UUID and the Author field", () => {
+		// Elgato ask for the organization name in both, and list changing a UUID
+		// after publishing as something not to do - so this is only ever right
+		// before the first submission.
+		expect(manifest.UUID.startsWith("com.bad-duck.")).toBe(true);
+		expect(manifest.Author).toBe("Bad Duck Software");
+
+		for (const action of manifest.Actions) {
+			expect(action.UUID.startsWith(`${manifest.UUID}.`), action.Name).toBe(true);
+		}
 	});
 });
