@@ -31,8 +31,22 @@ export function toKeyImage(svg: string): string {
 	return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
+/**
+ * Escapes a string for XML, including the double quote.
+ *
+ * The quote is not needed today: every value this touches lands in text
+ * content, and every attribute in this file takes a number or a colour from a
+ * fixed palette. It is here because the function does not say that - a helper
+ * called "escape" invites use in an attribute, and CodeQL raised exactly that
+ * against the Teams plugin, where the same helper had grown two attribute
+ * callers over time. Cheaper to be correct than to notice later.
+ */
 function escapeText(value: string): string {
-	return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+	return value
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;");
 }
 
 export type DialFace = {

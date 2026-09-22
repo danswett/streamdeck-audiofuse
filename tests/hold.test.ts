@@ -93,4 +93,21 @@ describe("dial panel stability", () => {
 	it("centres a reading that has no unit", () => {
 		expect(reading(renderDial({ label: "Preset", value: "3" })).anchor).toBe("middle");
 	});
+
+	it("escapes XML in whatever the device calls things", () => {
+		// Labels and values come from the AudioFuse, so they are not ours to
+		// assume anything about. Emitting them raw yields malformed SVG, which
+		// Stream Deck silently refuses to draw - a blank panel, no error.
+		//
+		// The double quote is here for the escaper rather than the caller:
+		// nothing puts these in an attribute today, but a helper called
+		// "escape" invites it, and CodeQL raised exactly that against the Teams
+		// plugin once the same helper had grown attribute callers.
+		const svg = renderDial({ label: "A & B", value: '"3"', unit: "<dB>" });
+
+		expect(svg).toContain("A &amp; B");
+		expect(svg).toContain("&quot;3&quot;");
+		expect(svg).toContain("&lt;dB&gt;");
+		expect(svg).not.toContain("<dB>");
+	});
 });
