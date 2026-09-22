@@ -1,0 +1,49 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # The plugin runs on macOS too, but the Stream Deck CLI packs on Windows and
+    # that is where it is developed against the hardware, so there is nothing to
+    # gain from a matrix here: the code under test is platform-agnostic HTTP.
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        # tests/live.test.ts needs a real AudioFuse and skips itself without
+        # FUSE_LIVE, so this is the offline suite.
+        run: npm test
+
+      - name: Build plugin
+        run: npm run build
+
+      - name: Validate manifest
+        run: npx streamdeck validate com.bad-duck.audiofuse.sdPlugin --no-update-check
+
+      - name: Package
+        run: npx streamdeck pack com.bad-duck.audiofuse.sdPlugin --output dist --force --no-update-check
+
+      - name: Upload plugin
+        uses: actions/upload-artifact@v7
+        with:
+          name: com.bad-duck.audiofuse.streamDeckPlugin
+          path: dist/*.streamDeckPlugin
+          if-no-files-found: error
