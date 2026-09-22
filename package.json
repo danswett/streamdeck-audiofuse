@@ -8,10 +8,10 @@
 	"scripts": {
 		"build": "npm run build:icons && rollup -c",
 		"build:icons": "node tools/build-icons.mjs",
-		"watch": "rollup -c -w --watch.onEnd=\"streamdeck restart com.dswett.audiofuse\"",
-		"validate": "streamdeck validate com.dswett.audiofuse.sdPlugin",
+		"watch": "rollup -c -w --watch.onEnd=\"streamdeck restart com.bad-duck.audiofuse\"",
+		"validate": "streamdeck validate com.bad-duck.audiofuse.sdPlugin",
 		"test": "vitest run",
-		"pack": "npm run build && streamdeck pack com.dswett.audiofuse.sdPlugin --output dist --force --no-update-check"
+		"pack": "npm run build && streamdeck pack com.bad-duck.audiofuse.sdPlugin --output dist --force --no-update-check"
 	},
 	"devDependencies": {
 		"@resvg/resvg-js": "^2.6.2",

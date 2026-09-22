@@ -2,11 +2,12 @@
 	"$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
 	"Name": "AudioFuse Control",
 	"Version": "1.0.0.0",
-	"Author": "dswett",
+	"Author": "Bad Duck Software",
 	"Description": "Control an Arturia AudioFuse 16Rig or Studio from your Stream Deck. Dials drive monitor volume, input gain and output trim with live dB on the LCD; keys mirror mute, dim, mono, A/B, reference level and preset slots. Uses the AudioFuse Control Center HTTP API.",
 	"Category": "AudioFuse Control",
 	"CategoryIcon": "imgs/plugin/category-icon",
 	"Icon": "imgs/plugin/marketplace",
+	"URL": "https://bad-duck.com",
 	"SupportURL": "https://github.com/danswett/streamdeck-audiofuse/issues",
 	"CodePath": "bin/plugin.js",
 	"SDKVersion": 3,
@@ -26,15 +27,17 @@
 	"Nodejs": {
 		"Version": "24"
 	},
-	"UUID": "com.dswett.audiofuse",
+	"UUID": "com.bad-duck.audiofuse",
 	"Actions": [
 		{
 			"Name": "AudioFuse Dial",
-			"UUID": "com.dswett.audiofuse.dial",
+			"UUID": "com.bad-duck.audiofuse.dial",
 			"Icon": "imgs/actions/dial/icon",
 			"Tooltip": "Drive any AudioFuse parameter from a dial, with live dB on the LCD.",
 			"PropertyInspectorPath": "ui/dial.html",
-			"Controllers": ["Encoder"],
+			"Controllers": [
+				"Encoder"
+			],
 			"Encoder": {
 				"layout": "layouts/fuse.json",
 				"TriggerDescription": {
@@ -51,10 +54,12 @@
 		},
 		{
 			"Name": "Mute",
-			"UUID": "com.dswett.audiofuse.mute",
+			"UUID": "com.bad-duck.audiofuse.mute",
 			"Icon": "imgs/actions/mute/icon",
 			"Tooltip": "Mute the main monitor output. Lights red while muted.",
-			"Controllers": ["Keypad"],
+			"Controllers": [
+				"Keypad"
+			],
 			"States": [
 				{
 					"Image": "imgs/actions/mute/key"
@@ -63,10 +68,12 @@
 		},
 		{
 			"Name": "Dim",
-			"UUID": "com.dswett.audiofuse.dim",
+			"UUID": "com.bad-duck.audiofuse.dim",
 			"Icon": "imgs/actions/dim/icon",
 			"Tooltip": "Drop the monitors by the device's dim amount.",
-			"Controllers": ["Keypad"],
+			"Controllers": [
+				"Keypad"
+			],
 			"States": [
 				{
 					"Image": "imgs/actions/dim/key"
@@ -75,10 +82,12 @@
 		},
 		{
 			"Name": "Mono",
-			"UUID": "com.dswett.audiofuse.mono",
+			"UUID": "com.bad-duck.audiofuse.mono",
 			"Icon": "imgs/actions/mono/icon",
 			"Tooltip": "Fold the monitor output to mono for a mix check.",
-			"Controllers": ["Keypad"],
+			"Controllers": [
+				"Keypad"
+			],
 			"States": [
 				{
 					"Image": "imgs/actions/mono/key"
@@ -87,10 +96,12 @@
 		},
 		{
 			"Name": "Speaker Set A/B",
-			"UUID": "com.dswett.audiofuse.speakers",
+			"UUID": "com.bad-duck.audiofuse.speakers",
 			"Icon": "imgs/actions/speakers/icon",
 			"Tooltip": "Switch between speaker sets A and B. Shows which is live.",
-			"Controllers": ["Keypad"],
+			"Controllers": [
+				"Keypad"
+			],
 			"States": [
 				{
 					"Image": "imgs/actions/speakers/key"
@@ -99,10 +110,12 @@
 		},
 		{
 			"Name": "Reference Level",
-			"UUID": "com.dswett.audiofuse.reference",
+			"UUID": "com.bad-duck.audiofuse.reference",
 			"Icon": "imgs/actions/reference/icon",
 			"Tooltip": "Snap the monitor to the calibrated reference level.",
-			"Controllers": ["Keypad"],
+			"Controllers": [
+				"Keypad"
+			],
 			"States": [
 				{
 					"Image": "imgs/actions/reference/key"
@@ -111,11 +124,13 @@
 		},
 		{
 			"Name": "Preset Recall",
-			"UUID": "com.dswett.audiofuse.preset",
+			"UUID": "com.bad-duck.audiofuse.preset",
 			"Icon": "imgs/actions/preset/icon",
 			"Tooltip": "Recall one of the eight preset slots. AudioFuse 16Rig only.",
 			"PropertyInspectorPath": "ui/preset.html",
-			"Controllers": ["Keypad"],
+			"Controllers": [
+				"Keypad"
+			],
 			"States": [
 				{
 					"Image": "imgs/actions/preset/key"

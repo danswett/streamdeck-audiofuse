@@ -38,7 +38,7 @@ To install a development build:
 
 ```bash
 npx streamdeck dev
-npx streamdeck link com.dswett.audiofuse.sdPlugin
+npx streamdeck link com.bad-duck.audiofuse.sdPlugin
 ```
 
 A newly linked plugin is only picked up when the Stream Deck app next scans, so

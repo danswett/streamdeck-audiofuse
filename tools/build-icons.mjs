@@ -22,7 +22,7 @@ import path from "node:path";
 
 import { Resvg } from "@resvg/resvg-js";
 
-const PLUGIN = "com.dswett.audiofuse.sdPlugin";
+const PLUGIN = "com.bad-duck.audiofuse.sdPlugin";
 const ACTIONS = path.join(PLUGIN, "imgs", "actions");
 const PLUGIN_IMGS = path.join(PLUGIN, "imgs", "plugin");
 

@@ -17,7 +17,7 @@ import path from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import { beforeAll, describe, expect, it } from "vitest";
 
-const PLUGIN_DIR = path.resolve(__dirname, "..", "com.dswett.audiofuse.sdPlugin");
+const PLUGIN_DIR = path.resolve(__dirname, "..", "com.bad-duck.audiofuse.sdPlugin");
 const manifest = JSON.parse(readFileSync(path.join(PLUGIN_DIR, "manifest.json"), "utf8")) as {
 	Category: string;
 	Author: string;

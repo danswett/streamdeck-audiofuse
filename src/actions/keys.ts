@@ -149,21 +149,21 @@ abstract class MonitorToggleAction extends WatchedKeyAction<KeySettings> {
 }
 
 /** Mutes the main monitor output. */
-@action({ UUID: "com.dswett.audiofuse.mute" })
+@action({ UUID: "com.bad-duck.audiofuse.mute" })
 export class FuseMuteAction extends MonitorToggleAction {
 	protected override readonly id = "monitor.mute";
 	protected override readonly tint = "#ff4f4f";
 }
 
 /** Drops the monitors by the device's dim amount. */
-@action({ UUID: "com.dswett.audiofuse.dim" })
+@action({ UUID: "com.bad-duck.audiofuse.dim" })
 export class FuseDimAction extends MonitorToggleAction {
 	protected override readonly id = "monitor.dim";
 	protected override readonly tint = "#ffb347";
 }
 
 /** Folds the monitor output to mono, for a mix sanity check. */
-@action({ UUID: "com.dswett.audiofuse.mono" })
+@action({ UUID: "com.bad-duck.audiofuse.mono" })
 export class FuseMonoAction extends MonitorToggleAction {
 	protected override readonly id = "monitor.mono";
 	protected override readonly tint = "#ffb347";
@@ -175,7 +175,7 @@ export class FuseMonoAction extends MonitorToggleAction {
  * Reads as the set currently selected rather than as on/off, because this is a
  * two-way selector and "A/B: off" would say nothing useful.
  */
-@action({ UUID: "com.dswett.audiofuse.speakers" })
+@action({ UUID: "com.bad-duck.audiofuse.speakers" })
 export class FuseSpeakerSetAction extends WatchedKeyAction<KeySettings> {
 	protected override endpoints(): readonly string[] {
 		return ["/monitoring/ab_speaker_set"];
@@ -199,7 +199,7 @@ export class FuseSpeakerSetAction extends WatchedKeyAction<KeySettings> {
  * The device reports whether it is currently at reference, so the key lights
  * up whenever the monitor happens to be there, however it got there.
  */
-@action({ UUID: "com.dswett.audiofuse.reference" })
+@action({ UUID: "com.bad-duck.audiofuse.reference" })
 export class FuseReferenceAction extends WatchedKeyAction<KeySettings> {
 	protected override endpoints(): readonly string[] {
 		return ["/monitoring/is_at_reference_level", "/monitoring/reference_level"];
@@ -233,7 +233,7 @@ type PresetSettings = { slot?: number } & JsonObject;
  * slot and name, so the store re-reads everything on screen when the slot
  * changes rather than trusting the event alone.
  */
-@action({ UUID: "com.dswett.audiofuse.preset" })
+@action({ UUID: "com.bad-duck.audiofuse.preset" })
 export class FusePresetAction extends WatchedKeyAction<PresetSettings> {
 	protected override endpoints(): readonly string[] {
 		return ["/preset/slot", "/preset/names", "/preset/saved"];

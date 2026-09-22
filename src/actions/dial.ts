@@ -53,7 +53,7 @@ type Instance = {
  * six encoders but well over thirty continuous parameters, so fixing the
  * mapping in the manifest would make most of them unreachable.
  */
-@action({ UUID: "com.dswett.audiofuse.dial" })
+@action({ UUID: "com.bad-duck.audiofuse.dial" })
 export class FuseDialAction extends SingletonAction<DialSettings & JsonObject> {
 	readonly #instances = new Map<string, Instance>();
 	#unwatchStatus: (() => void) | undefined;

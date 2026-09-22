@@ -1,5 +1,5 @@
 node_modules/
 dist/
 *.tsbuildinfo
-com.dswett.audiofuse.sdPlugin/bin/
-com.dswett.audiofuse.sdPlugin/logs/
+com.bad-duck.audiofuse.sdPlugin/bin/
+com.bad-duck.audiofuse.sdPlugin/logs/
