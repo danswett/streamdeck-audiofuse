@@ -33,9 +33,20 @@ function readPort(value: unknown): number | undefined {
 	return Number.isInteger(port) && port > 0 && port < 65536 ? port : undefined;
 }
 
-streamDeck.settings.onDidReceiveGlobalSettings(async () => {
-	const settings = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
-	fuse.setManualPort(readPort(settings?.manualPort));
+/**
+ * Applies a port pinned in the Property Inspector.
+ *
+ * The settings arrive on the event itself, and must be read from there. Calling
+ * getGlobalSettings() in this handler instead is a runaway loop: Stream Deck
+ * answers every request with a didReceiveGlobalSettings, which re-enters this
+ * handler, which requests again. The SDK suppresses the echo only when
+ * useExperimentalMessageIdentifiers is enabled, which it is not by default, so
+ * the loop is uncapped - it settles at roughly 385 round trips a second, and
+ * the cost lands on Stream Deck rather than here: the host burns a full core
+ * serialising replies and leaks about 2 GB an hour while the plugin sits idle.
+ */
+streamDeck.settings.onDidReceiveGlobalSettings<GlobalSettings>((ev) => {
+	fuse.setManualPort(readPort(ev.settings?.manualPort));
 });
 
 // Connect first: both the settings and the remembered port come from the host.
