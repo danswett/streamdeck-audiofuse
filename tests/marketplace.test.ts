@@ -15,7 +15,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { Resvg } from "@resvg/resvg-js";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 const PLUGIN_DIR = path.resolve(__dirname, "..", "com.dswett.audiofuse.sdPlugin");
 const manifest = JSON.parse(readFileSync(path.join(PLUGIN_DIR, "manifest.json"), "utf8")) as {
@@ -45,7 +45,20 @@ const LIST_RASTER = 40;
 /** Below this alpha the pixel is antialiasing fringe, not artwork. */
 const INK = 16;
 
-function rasterise(file: string): { pixels: Uint8Array; width: number; height: number } {
+type Raster = { pixels: Uint8Array; width: number; height: number };
+
+/**
+ * Cached, because each icon is measured for colour, coverage and corners, and
+ * rasterising is native work that pays a one-off initialization on first use.
+ * On a cold CI runner that start-up alone can blow vitest's 5s default timeout
+ * and fail whichever assertion happens to go first. Warmed in `beforeAll`.
+ */
+const rasterCache = new Map<string, Raster>();
+
+function rasterise(file: string): Raster {
+	const cached = rasterCache.get(file);
+	if (cached) return cached;
+
 	const markup =
 		path.extname(file) === ".svg"
 			? readFileSync(file, "utf8")
@@ -57,7 +70,10 @@ function rasterise(file: string): { pixels: Uint8Array; width: number; height: n
 				`${readFileSync(file).toString("base64")}"/></svg>`;
 
 	const img = new Resvg(markup, { fitTo: { mode: "width", value: LIST_RASTER } }).render();
-	return { pixels: img.pixels, width: img.width, height: img.height };
+	const raster = { pixels: img.pixels, width: img.width, height: img.height };
+
+	rasterCache.set(file, raster);
+	return raster;
 }
 
 /**
@@ -101,6 +117,17 @@ const listIcons: [string, string][] = [
 	["category", manifest.CategoryIcon],
 	...manifest.Actions.map((a): [string, string] => [a.Name, a.Icon])
 ];
+
+/**
+ * Rasterises every icon up front.
+ *
+ * Generous, because it is paying for native start-up rather than for the work
+ * itself; every assertion after it reads a cached raster.
+ */
+beforeAll(() => {
+	for (const [, ref] of listIcons) rasterise(resolveImage(ref));
+	for (const action of manifest.Actions) rasterise(resolveImage(action.States[0].Image));
+}, 120_000);
 
 describe("action list icons", () => {
 	it.each(listIcons)("%s is white, and only white", (_name, ref) => {
