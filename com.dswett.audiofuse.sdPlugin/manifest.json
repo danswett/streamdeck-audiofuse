@@ -31,7 +31,7 @@
 		{
 			"Name": "AudioFuse Dial",
 			"UUID": "com.dswett.audiofuse.dial",
-			"Icon": "imgs/actions/dial",
+			"Icon": "imgs/actions/dial/icon",
 			"Tooltip": "Drive any AudioFuse parameter from a dial, with live dB on the LCD.",
 			"PropertyInspectorPath": "ui/dial.html",
 			"Controllers": ["Encoder"],
@@ -45,80 +45,80 @@
 			},
 			"States": [
 				{
-					"Image": "imgs/actions/dial"
+					"Image": "imgs/actions/dial/key"
 				}
 			]
 		},
 		{
 			"Name": "Mute",
 			"UUID": "com.dswett.audiofuse.mute",
-			"Icon": "imgs/actions/mute",
+			"Icon": "imgs/actions/mute/icon",
 			"Tooltip": "Mute the main monitor output. Lights red while muted.",
 			"Controllers": ["Keypad"],
 			"States": [
 				{
-					"Image": "imgs/actions/mute"
+					"Image": "imgs/actions/mute/key"
 				}
 			]
 		},
 		{
 			"Name": "Dim",
 			"UUID": "com.dswett.audiofuse.dim",
-			"Icon": "imgs/actions/dim",
+			"Icon": "imgs/actions/dim/icon",
 			"Tooltip": "Drop the monitors by the device's dim amount.",
 			"Controllers": ["Keypad"],
 			"States": [
 				{
-					"Image": "imgs/actions/dim"
+					"Image": "imgs/actions/dim/key"
 				}
 			]
 		},
 		{
 			"Name": "Mono",
 			"UUID": "com.dswett.audiofuse.mono",
-			"Icon": "imgs/actions/mono",
+			"Icon": "imgs/actions/mono/icon",
 			"Tooltip": "Fold the monitor output to mono for a mix check.",
 			"Controllers": ["Keypad"],
 			"States": [
 				{
-					"Image": "imgs/actions/mono"
+					"Image": "imgs/actions/mono/key"
 				}
 			]
 		},
 		{
 			"Name": "Speaker Set A/B",
 			"UUID": "com.dswett.audiofuse.speakers",
-			"Icon": "imgs/actions/speakers",
+			"Icon": "imgs/actions/speakers/icon",
 			"Tooltip": "Switch between speaker sets A and B. Shows which is live.",
 			"Controllers": ["Keypad"],
 			"States": [
 				{
-					"Image": "imgs/actions/speakers"
+					"Image": "imgs/actions/speakers/key"
 				}
 			]
 		},
 		{
 			"Name": "Reference Level",
 			"UUID": "com.dswett.audiofuse.reference",
-			"Icon": "imgs/actions/reference",
+			"Icon": "imgs/actions/reference/icon",
 			"Tooltip": "Snap the monitor to the calibrated reference level.",
 			"Controllers": ["Keypad"],
 			"States": [
 				{
-					"Image": "imgs/actions/reference"
+					"Image": "imgs/actions/reference/key"
 				}
 			]
 		},
 		{
 			"Name": "Preset Recall",
 			"UUID": "com.dswett.audiofuse.preset",
-			"Icon": "imgs/actions/preset",
+			"Icon": "imgs/actions/preset/icon",
 			"Tooltip": "Recall one of the eight preset slots. AudioFuse 16Rig only.",
 			"PropertyInspectorPath": "ui/preset.html",
 			"Controllers": ["Keypad"],
 			"States": [
 				{
-					"Image": "imgs/actions/preset"
+					"Image": "imgs/actions/preset/key"
 				}
 			]
 		}

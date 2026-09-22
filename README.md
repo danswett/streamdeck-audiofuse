@@ -28,7 +28,7 @@ sent, so changes made in Control Center or on the unit itself show up too.
 
 ```bash
 npm install
-npm run build          # rasterizes icons, then bundles with rollup
+npm run build          # draws the icons, then bundles with rollup
 npm run validate       # checks the plugin against Elgato's schema
 npm test               # unit tests
 npm run watch          # rebuild and restart the plugin on change
@@ -54,6 +54,22 @@ $env:FUSE_LIVE = "1"; npx vitest run tests/live.test.ts
 
 It captures the monitor volume first and restores it afterwards, asserting the
 restore. It does move the monitor volume while running.
+
+### Artwork
+
+`tools/build-icons.mjs` draws everything from one source, because the list and
+the deck follow different rules. Elgato require the category icon and every
+action icon — the ones inside the Stream Deck app's
+[action list](https://docs.elgato.com/guidelines/stream-deck/plugins#icons) — to
+be a monochrome white stroke on a transparent background, and call out colour
+and solid backgrounds as incorrect. Keys have no such restriction, and are where
+this plugin's colour lives.
+
+So each glyph is emitted twice: `imgs/actions/<name>/icon.svg` in white for the
+list, `key.svg` in the control's tint for the deck. `tests/marketplace.test.ts`
+rasterises every list icon and fails on any colour but white, on a solid
+background, or on an icon that draws nothing — pixels rather than markup, so a
+PNG cannot slip past by having no fills to read.
 
 ## Notes on the AudioFuse HTTP API
 
