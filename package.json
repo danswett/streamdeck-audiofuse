@@ -9,6 +9,7 @@
 		"build": "npm run build:icons && rollup -c",
 		"build:icons": "node tools/build-icons.mjs",
 		"watch": "rollup -c -w --watch.onEnd=\"streamdeck restart com.bad-duck.audiofuse\"",
+		"marketplace": "node tools/generate-marketplace.ts",
 		"validate": "streamdeck validate com.bad-duck.audiofuse.sdPlugin",
 		"test": "vitest run",
 		"pack": "npm run build && streamdeck pack com.bad-duck.audiofuse.sdPlugin --output dist --force --no-update-check"
