@@ -49,9 +49,37 @@ jobs:
             throw "tag $tag does not match manifest version $manifest"
           }
 
+      - name: Write the release notes
+        shell: pwsh
+        run: |
+          # Built from the manifest rather than written out here, so a release
+          # cannot describe a plugin other than the one attached to it.
+          $m = Get-Content com.bad-duck.audiofuse.sdPlugin/manifest.json -Raw | ConvertFrom-Json
+          $keys = ($m.Actions | Where-Object { $_.Controllers -contains 'Keypad' }).Count
+          $dials = ($m.Actions | Where-Object { $_.Controllers -contains 'Encoder' }).Count
+          $os = ($m.OS | ForEach-Object { "$($_.Platform) $($_.MinimumVersion)+" }) -join ', '
+
+          @"
+          $($m.Description)
+
+          **$($m.Actions.Count) actions** - $keys key, $dials dial.
+
+          ### Install
+          Download ``com.bad-duck.audiofuse.streamDeckPlugin`` below and double-click it.
+
+          ### Requires
+          - $os
+          - Stream Deck $($m.Software.MinimumVersion) or later
+          - AudioFuse Control Center running, with its HTTP API reachable
+          "@ | Set-Content release-notes.md -Encoding utf8
+
       - name: Attach the plugin to the release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
           files: dist/*.streamDeckPlugin
           fail_on_unmatched_files: true
+          body_path: release-notes.md
+          # Appended below the description: what actually changed, from the
+          # commits, without anyone having to keep a changelog by hand.
+          generate_release_notes: true
