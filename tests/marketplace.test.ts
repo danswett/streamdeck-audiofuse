@@ -226,14 +226,15 @@ describe("the Marketplace listing", () => {
 	const readme = readFileSync(path.join(MARKET_DIR, "README.md"), "utf8");
 
 	/**
-	 * Every fenced block, plus the first non-empty line after it - which is
-	 * where each piece of copy states its own length.
+	 * Every fenced block, the heading it sits under, and the first non-empty
+	 * line after it - which is where each piece of copy states its own length.
 	 */
-	function fencedBlocks(): { lang: string; text: string; after: string }[] {
-		const out: { lang: string; text: string; after: string }[] = [];
+	function fencedBlocks(): { lang: string; heading: string; text: string; after: string }[] {
+		const out: { lang: string; heading: string; text: string; after: string }[] = [];
 		const lines = readme.split(/\r?\n/);
 		let inFence = false;
 		let lang = "";
+		let heading = "";
 		let buf: string[] = [];
 
 		for (let i = 0; i < lines.length; i++) {
@@ -245,19 +246,34 @@ describe("the Marketplace listing", () => {
 					buf = [];
 				} else {
 					const after = lines.slice(i + 1).find((l) => l.trim() !== "") ?? "";
-					out.push({ lang, text: buf.join("\n"), after: after.trim() });
+					out.push({ lang, heading, text: buf.join("\n"), after: after.trim() });
 					inFence = false;
 				}
 				continue;
 			}
-			if (inFence) buf.push(lines[i]!);
+			if (inFence) {
+				buf.push(lines[i]!);
+				continue;
+			}
+			const title = /^#{2,3}\s+(.*?)\s*$/.exec(lines[i]!);
+			if (title) heading = title[1]!;
 		}
 		return out;
 	}
 
 	const plain = fencedBlocks().filter((b) => b.lang === "");
-	const name = plain.find((b) => !b.text.includes("\n"))?.text ?? "";
-	const description = plain.find((b) => b.text.startsWith("Control an Arturia"))?.text ?? "";
+
+	/**
+	 * Copy is found by the heading above it rather than by its own opening
+	 * words. This file exists to be rewritten, and a block matched on the text
+	 * it starts with stops being found the first time that text changes -
+	 * which silently detaches every assertion below from the copy it guards
+	 * while the suite stays green.
+	 */
+	const copyUnder = (section: string): string => plain.find((b) => b.heading === section)?.text ?? "";
+
+	const name = copyUnder("Name");
+	const description = copyUnder("Description");
 
 	/** Reads width and height out of a PNG's IHDR, no decoder needed. */
 	function pngSize(file: string): { width: number; height: number } {
@@ -267,13 +283,33 @@ describe("the Marketplace listing", () => {
 	}
 
 	it("names the product the same way the manifest does", () => {
+		expect(name, 'no copy under "## Name"').not.toBe("");
 		expect(name).toBe(manifest.Name);
 		expect(name.length).toBeLessThanOrEqual(30);
 	});
 
 	it("keeps the description within 250 and 1500 characters", () => {
+		expect(description, 'no copy under "## Description"').not.toBe("");
 		expect(description.length).toBeGreaterThanOrEqual(250);
 		expect(description.length).toBeLessThanOrEqual(1500);
+	});
+
+	it("names every action the plugin ships", () => {
+		// The guidelines ask for features and actions in the description, and
+		// the action list is that inventory. Asserted both ways round: copy
+		// that stops naming an action fails, and so does an action added later
+		// that the listing never mentions.
+		for (const action of manifest.Actions) {
+			expect(description, `description omits "${action.Name}"`).toContain(action.Name);
+		}
+	});
+
+	it("says how the plugin reaches the device", () => {
+		// The guidelines ask a listing to state its requirements. A plugin that
+		// needs a companion app running has to say so, or the first thing a
+		// buyer meets is a deck of dimmed keys.
+		expect(description).toContain("AudioFuse Control Center");
+		expect(description).toMatch(/http api/i);
 	});
 
 	it("says what it does in a first sentence short enough to survive truncation", () => {
@@ -289,12 +325,15 @@ describe("the Marketplace listing", () => {
 
 	it("states a character count that matches the copy it describes", () => {
 		// Maker Console enforces a limit against the number, so a stale count is
-		// worse than none.
+		// worse than none. Matched on a word boundary rather than to end of
+		// line, because the sentence that states a count usually goes on to say
+		// what the count means - and anchoring to `$` silently skipped every
+		// block that did, leaving the counts unchecked.
 		const counted = plain
-			.map((b) => ({ block: b, stated: /^([\d,]+) characters\.?$/.exec(b.after) }))
+			.map((b) => ({ block: b, stated: /^([\d,]+) characters\b/.exec(b.after) }))
 			.filter((x) => x.stated !== null);
 
-		expect(counted.length, "no block states its own length").toBeGreaterThan(0);
+		expect(counted.length, "no block states its own length").toBe(plain.length);
 
 		for (const { block, stated } of counted) {
 			const actual = block.text.replace(/\n+$/, "").length;

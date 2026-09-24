@@ -28,8 +28,10 @@ which both halves of the plugin — keys and dials — are shown working, and th
 two things a buyer actually wants to know are answered: that the state is real,
 and that it is honest when the device is missing.
 
-No video. The guidelines allow one and do not require it, and a 55-second clip
-of a mute key lighting up would say less than the stills.
+A video is separate, and not optional for this product: Elgato require one
+before approving anything that depends on hardware, and it goes to
+maker@elgato.com by email rather than being uploaded with the listing. See
+[what is reviewed](https://docs.elgato.com/maker-console/review-process#what-is-reviewed).
 
 Product file: `dist/com.bad-duck.audiofuse.streamDeckPlugin`, built by
 `npm run pack` and attached to every GitHub release by the release workflow.
@@ -48,25 +50,41 @@ characters — see [product guidelines](https://docs.elgato.com/guidelines/produ
 ## Description
 
 The first 250 characters are what search engines show, so the opening sentences
-carry the requirement and the differentiator rather than a preamble.
+carry the requirement and the differentiator rather than a preamble. After that
+the copy works through what the product does, what is included, and how it
+works, in that order, under headings a reader can skim.
 
 ```
-Control an Arturia AudioFuse from your Stream Deck. Mute, dim, mono, speaker set A/B, reference level and preset recall, each on a key that shows what the device is actually doing rather than the last thing you pressed.
+AudioFuse Control turns a Stream Deck into a monitor controller for the Arturia AudioFuse 16Rig and Studio. Mute, dim, mono, speaker A/B, reference level and preset recall each get a key, and Stream Deck + dials drive monitor volume, input gain and output trim in dB.
 
-Turn a knob on the unit, or change something in AudioFuse Control Center, and the keys follow. State is read from the device over its own HTTP API and pushed live, so two people looking at the desk and the deck see the same thing.
+Seven actions, six of them keys that work on any Stream Deck:
+- Mute: mutes the main monitor output, red while muted.
+- Dim: drops the monitors by the device's dim amount.
+- Mono: folds the monitors to mono for a mix check.
+- Speaker Set A/B: switches speaker sets, showing which is live.
+- Reference Level: snaps the monitor to your calibrated level, and lights while it sits there.
+- Preset Recall: recalls any of the eight slots by its stored name. 16Rig only.
+- AudioFuse Dial: on a Stream Deck + encoder, drives one parameter — monitor volume, reference level, input gain 1-16, output trim 3-10, preset slot or sample rate — showing its name, the live dB reading and a range-scaled bar. Push to mute, jump to reference or reset.
 
-On a Stream Deck + or + XL the dials drive monitor volume, input gain and output trim, with the reading in dB on the touch strip. The number is pinned to its right edge so the decimal point stays still while you turn, and a muted output turns the readout red rather than hiding it.
+How it works: the plugin finds AudioFuse Control Center's local HTTP API automatically and reads state back from the hardware, so turning a knob on the unit or changing something in Control Center moves the keys too. Keys dim when the AudioFuse is unreachable. No driver, MIDI mapping or virtual audio device.
 
-Keys dim when the AudioFuse is not reachable — Control Center closed, unit unplugged, or the API refused — rather than looking ready and doing nothing.
-
-No driver, no MIDI mapping, no virtual audio device. It talks to AudioFuse Control Center, which you are already running.
-
-Requires Windows 10 or later or macOS 13 or later, Stream Deck 7.1 or later, an AudioFuse 16Rig or AudioFuse Studio, and AudioFuse Control Center running with its HTTP API reachable. Not affiliated with or endorsed by Arturia.
+Requires an AudioFuse 16Rig or Studio, and AudioFuse Control Center running with Preferences > Http Api > Server set to On. Not affiliated with or endorsed by Arturia.
 ```
 
-1,196 characters, within the 1,500 limit and above the 250 minimum. The opening
-sentence runs to 51 characters, so whatever a search engine truncates, it opens
-on a complete statement of what the plugin is.
+1,482 characters, within the 1,500 limit and above the 250 minimum. The opening
+sentence runs to 107 characters, so whatever a search engine truncates, it
+opens on a complete statement of what the plugin is, and the first 250
+characters stay unformatted as the guidelines ask.
+
+Naming every action is deliberate: the action list is the product's inventory,
+and a reviewer cannot confirm that a listing matches a plugin from prose that
+gestures at "keys". It also puts each action's name where Marketplace search
+can index it.
+
+The operating systems and the Stream Deck version are omitted here because
+Maker Console takes them from the manifest and shows them beside the
+description. Repeating them spends characters on something already on screen —
+the AudioFuse and Control Center requirements are not, so they stay.
 
 Character counts are asserted by `tests/marketplace.test.ts`, which also checks
 the copy does not name a control the plugin no longer ships.
