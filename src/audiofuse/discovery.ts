@@ -1,11 +1,20 @@
 import streamDeck from "@elgato/streamdeck";
 
+import { ControlCenterArmer } from "./arm";
 import { PortFinder } from "./ports";
 
 const logger = streamDeck.logger.createScope("fuse-discovery");
 
 /** How often to re-check that the server we found is still there. */
 const LIVENESS_MS = 5000;
+
+/**
+ * Consecutive empty searches before Control Center is run to turn the API on.
+ *
+ * A few ticks of grace first, so a machine that is still finishing logon - or a
+ * user who is opening Control Center themselves - is left alone.
+ */
+const ARM_AFTER_MISSES = 3;
 
 export type DiscoveryEvents = {
 	onUp: (port: number) => void;
@@ -23,6 +32,7 @@ export type DiscoveryEvents = {
  */
 export class FuseDiscovery {
 	readonly #finder = new PortFinder();
+	readonly #armer: ControlCenterArmer;
 	readonly #events: DiscoveryEvents;
 
 	#manualPort: number | undefined;
@@ -30,9 +40,11 @@ export class FuseDiscovery {
 	#current: number | undefined;
 	#timer: NodeJS.Timeout | undefined;
 	#searching = false;
+	#misses = 0;
 
-	constructor(events: DiscoveryEvents) {
+	constructor(events: DiscoveryEvents, armer: ControlCenterArmer = new ControlCenterArmer()) {
 		this.#events = events;
+		this.#armer = armer;
 	}
 
 	get port(): number | undefined {
@@ -69,6 +81,7 @@ export class FuseDiscovery {
 		this.#manualPort = valid;
 		logger.info(valid ? `manual port override: ${valid}` : "manual port override cleared");
 		this.#finder.forget();
+		this.#misses = 0;
 		if (this.#current !== undefined) {
 			this.#current = undefined;
 			this.#events.onDown();
@@ -80,22 +93,42 @@ export class FuseDiscovery {
 		if (this.#searching) return;
 		this.#searching = true;
 		try {
-			if (this.#manualPort !== undefined) {
-				await this.#useManual();
+			await this.#locate();
+			if (this.#current !== undefined) {
+				this.#misses = 0;
 				return;
 			}
-			if (this.#current !== undefined) {
-				// A failed check means Control Center quit or the user switched
-				// the API off; drop the port and hunt for it again.
-				if (await this.#finder.check(this.#current)) return;
-				logger.info(`lost the API on port ${this.#current}`);
-				this.#current = undefined;
-				this.#events.onDown();
+
+			// Nothing is listening. After a reboot that is the normal state:
+			// Control Center's agent is running but has not started the HTTP
+			// server, and only Control Center itself will start it. Run it once,
+			// then look again straight away rather than waiting a tick.
+			this.#misses += 1;
+			if (this.#misses >= ARM_AFTER_MISSES && (await this.#armer.arm())) {
+				this.#misses = 0;
+				this.#finder.forget();
+				await this.#locate();
 			}
-			await this.#search();
 		} finally {
 			this.#searching = false;
 		}
+	}
+
+	/** One pass of finding, or re-confirming, the API. */
+	async #locate(): Promise<void> {
+		if (this.#manualPort !== undefined) {
+			await this.#useManual();
+			return;
+		}
+		if (this.#current !== undefined) {
+			// A failed check means Control Center quit or the user switched
+			// the API off; drop the port and hunt for it again.
+			if (await this.#finder.check(this.#current)) return;
+			logger.info(`lost the API on port ${this.#current}`);
+			this.#current = undefined;
+			this.#events.onDown();
+		}
+		await this.#search();
 	}
 
 	async #useManual(): Promise<void> {

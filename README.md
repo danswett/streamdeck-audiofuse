@@ -207,6 +207,51 @@ Documented as returning the active subscription set; returns **404** on this
 build. There is no way to read back what you are subscribed to, so the plugin
 re-posts its full list every 35 seconds against the ~50 second expiry.
 
+### The API is off after every reboot, and only Control Center can turn it on
+
+The agent that hosts the API, `AudioFuseControlCenterAgent.exe`, is started at
+logon by a shortcut the installer puts in the common Startup folder. It loads
+the API's own `server.dll` and `httpfuse.dll` — and then never starts the
+server. A machine that has just booted has an agent running and nothing
+listening, which is the `No API` state.
+
+Whether the server runs is recorded in the agent's
+`C:\ProgramData\Arturia\AudioFuse Control Center\resources\httpapi\config.json`:
+
+```json
+{ "enabled": false, "port": 60465 }
+```
+
+The agent writes `enabled: false` there as it shuts down, so every session
+starts with the flag off. The flag cannot be set back on disk either: an agent
+that finds it already `true` at startup exits within a couple of seconds and
+rewrites it to `false`. Nor does the agent watch the file — flipping it under a
+running agent does nothing at all. The user's actual preference lives somewhere
+else entirely, as `EnableHttpApi` in `resources\tmp\af.pref.xml`, and only
+Control Center reads it.
+
+Control Center is the only thing that turns the server on. It signals the agent
+that is already running rather than starting its own — the agent keeps the same
+pid across a launch — and the server then stays up inside the agent after the
+window closes. Hence the folklore fix of opening Control Center once after a
+reboot and closing it again.
+
+`ControlCenterArmer` in `src/audiofuse/arm.ts` does that launch instead of the
+user. After three empty searches — grace for a machine still finishing logon, or
+for someone opening Control Center themselves — it starts Control Center, hides
+the window as soon as it appears, waits for `/version` to answer, then closes it
+and leaves the agent serving. Two details matter:
+
+- Hiding a window zeroes `Process.MainWindowHandle`, so the handle is captured
+  before hiding; otherwise there is no way to close the window afterwards.
+- The API is armed a second or two after launch, well before Control Center has
+  finished starting, and a `WM_CLOSE` sent that early is silently dropped —
+  leaving the window on screen until it is killed. `WaitForInputIdle` first,
+  then close.
+
+Windows only. macOS is not known to need it, and the window handling has no
+equivalent there.
+
 ### Discovery does not work on Windows
 
 The documentation says to find the port over DNS-SD (`_audiofusehttp._tcp.`).
@@ -230,4 +275,7 @@ inspector, under *Connection*.
 
 - AudioFuse Control Center installed, with its agent running.
 - **Preferences → Http Api → Server: On.** Off by default; nothing works without it.
+  The agent also leaves the server off after every reboot, so on Windows the
+  plugin runs Control Center itself to turn it back on — see
+  [the API is off after every reboot](#the-api-is-off-after-every-reboot-and-only-control-center-can-turn-it-on).
 - An AudioFuse 16Rig or Studio connected. Other models are refused by the API.
